@@ -7,7 +7,11 @@ def turno_inimigo(inimigo):
     if inimigo["vida"] <= 15 and inimigo["mana"] >= 3:
         acao = random.choice(["cura", "cura", "ataque", "regenerar mana"])
     else:
-        acao = random.choice(["ataque", "cura", "regenerar mana"])
+        acoes = ["ataque", "regenerar mana"]
+        if inimigo["mana"] >= 3:
+            acoes.append("cura")
+
+        acao = random.choice(acoes)
 
     if acao == "ataque":
         dano = rolar_dados(3, 8)
@@ -17,6 +21,7 @@ def turno_inimigo(inimigo):
     elif acao == "cura" and inimigo["mana"] >= 3:
         cura = rolar_dados(2, 6)
         inimigo["vida"] += cura
+        inimigo["vida"] = min(inimigo["vida"], inimigo["vida_max"])
         inimigo["mana"] -= 3
         print(f"{inimigo['nome']} se curou em {cura} PV!")
         return ("cura", cura)
@@ -90,7 +95,7 @@ while True:
 
     escolha = input("Digite a opção desejada: ")
 
-    # ✅ CORREÇÃO PRINCIPAL AQUI
+    # CORREÇÃO PRINCIPAL AQUI
     if escolha == "1":
         print("1 - Mago")
         print("2 - Combatente")
@@ -118,11 +123,11 @@ while True:
         selecao = input("Digite o número do inimigo escolhido: ")
 
         if selecao == "1":
-            inimigo = {"nome": "Goblin", "vida": 40, "mana": 10}
+            inimigo = {"nome": "Goblin", "vida": 40,"vida_max":40, "mana": 10}
         elif selecao == "2":
-            inimigo = {"nome": "Esqueleto", "vida": 30, "mana": 10}
+            inimigo = {"nome": "Esqueleto", "vida": 30,"vida_max":30, "mana": 10}
         elif selecao == "3":
-            inimigo = {"nome": "Slime", "vida": 50, "mana": 15}
+            inimigo = {"nome": "Slime", "vida": 50,"vida_max":50, "mana": 15}
         else:
             print("Opção inválida!")
             continue
@@ -151,6 +156,7 @@ while True:
                 dano = rolar_dados(personagem["atk_dados"], personagem["atk_lados"])
                 inimigo["vida"] -= dano
                 print(f"Você causou {dano} de dano!")
+                personagem["mana"] -= personagem["atk_mana"]
 
             elif acao == "cura":
                 if personagem["mana"] < personagem["cura_mana"] :
@@ -164,8 +170,8 @@ while True:
                     print(f"Você se curou em {cura} PV!")
 
             elif acao == "regenerar mana":
-                if personagem["mana"] > personagem["mana_max"]:
-                    personagem["mana"] = personagem["mana_max"]
+                if personagem["mana"] >= personagem["mana_max"]:
+                    print("Mana já está cheia!")
                     continue
                 
                 mana = rolar_dados(2, 4)
@@ -174,6 +180,9 @@ while True:
 
                 
                 personagem["mana"] = min(personagem["mana"], personagem["mana_max"])
+            else:
+                print("Ação inválida!")
+                continue
                 
             if inimigo["vida"] <= 0:
                 break
