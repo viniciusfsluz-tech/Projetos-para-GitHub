@@ -15,6 +15,10 @@ def turno_inimigo(inimigo):
 
     if acao == "ataque":
         dano = rolar_dados(3, 8)
+
+        if random.random() < 0.15:  # 15% de chance de crítico
+            dano *= 2
+            print("⚡ Ataque crítico do inimigo!")
         print(f"{inimigo['nome']} atacou e causou {dano} de dano!")
         return ("ataque", dano)
 
@@ -154,6 +158,10 @@ while True:
                     continue
 
                 dano = rolar_dados(personagem["atk_dados"], personagem["atk_lados"])
+
+                if random.random() < 0.2:
+                    dano *= 2
+                    print("💥 Ataque crítico!")
                 inimigo["vida"] -= dano
                 print(f"Você causou {dano} de dano!")
                 personagem["mana"] -= personagem["atk_mana"]
