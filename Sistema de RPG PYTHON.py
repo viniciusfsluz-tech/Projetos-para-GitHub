@@ -4,14 +4,12 @@ def rolar_dados(qtd, lados):
     return sum(random.randint(1, lados) for _ in range(qtd))
 
 def turno_inimigo(inimigo):
-    if inimigo["vida"] <= 15 and inimigo["mana"] >= 3:
-        acao = random.choice(["cura", "cura", "ataque", "regenerar mana"])
+    if inimigo["vida"] <= inimigo["vida_max"] * 0.3 and inimigo["mana"] >= 3:
+        acao = "cura"
+    elif inimigo["mana"] < 3:
+        acao = "regenerar mana"
     else:
-        acoes = ["ataque", "regenerar mana"]
-        if inimigo["mana"] >= 3:
-            acoes.append("cura")
-
-        acao = random.choice(acoes)
+        acao = random.choice(["ataque", "ataque", "regenerar mana"])
 
     if acao == "ataque":
         dano = rolar_dados(3, 8)
@@ -22,7 +20,7 @@ def turno_inimigo(inimigo):
         print(f"{inimigo['nome']} atacou e causou {dano} de dano!")
         return ("ataque", dano)
 
-    elif acao == "cura" and inimigo["mana"] >= 3:
+    elif acao == "cura":
         cura = rolar_dados(2, 6)
         inimigo["vida"] += cura
         inimigo["vida"] = min(inimigo["vida"], inimigo["vida_max"])
@@ -50,8 +48,8 @@ mago = {
     "nome": "Mago",
     "vida": 30,
     "vida_max": 30,
-    "mana": 50,
-    "mana_max": 50,
+    "mana": 40,
+    "mana_max": 40,
     "atk_dados": 3,
     "atk_lados": 8,
     "atk_mana": 8,
@@ -64,14 +62,14 @@ combatente = {
     "nome": "Combatente",
     "vida": 50,
     "vida_max": 50,
-    "mana": 4,
+    "mana": 20,
     "mana_max": 20,
     "atk_dados": 3,
     "atk_lados": 10,
-    "atk_mana": 0,
+    "atk_mana": 2,
     "cura_dados": 6,
     "cura_lados": 6,
-    "cura_mana": 7
+    "cura_mana": 5
 }
 
 assassino = {
@@ -145,10 +143,29 @@ while True:
 
         print("⚔ Combate iniciado!")
 
+        turnos = 0
+        turnos_max = 20
+        combate_encerrado = False
+        
+
         while personagem["vida"] > 0 and inimigo["vida"] > 0:
+            turnos += 1
+            
+            turnos_restantes = max(0, turnos_max - turnos)
+
+            if turnos > turnos_max:
+                print("⏳ Combate terminou por demora!")
+                combate_encerrado = True
+                break
             print("\n---------------------")
             print(f"{personagem['nome']} - PV: {personagem['vida']} | Mana: {personagem['mana']}")
             print(f"{inimigo['nome']} - PV: {inimigo['vida']} | Mana: {inimigo['mana']}")
+            print(f"\n🔄 Turno {turnos}")
+            print(f"⏳ Restam {turnos_restantes} turnos para derrotar o inimigo!")
+            if 0 < turnos_restantes <= 5:
+                print(f"⚠️ Últimos {turnos_restantes} turnos!")
+
+            print("---------------------")
 
             acao = input("Escolha ataque , cura ou regenerar mana: ").lower()
 
@@ -200,8 +217,9 @@ while True:
 
             if acao_inimigo == "ataque":
                 personagem["vida"] -= valor
-
-        if personagem["vida"] <= 0:
+        if combate_encerrado:
+            print("\n⚖️ Empate!")
+        elif personagem["vida"] <= 0:
             print("\n💀 Você foi derrotado!")
         else:
             print("\n🏆 Você venceu!")
